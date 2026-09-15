@@ -1,0 +1,301 @@
+{
+  "match_id": "practice_match_001",
+  "analyzed_player": "player_1",
+  "coordinate_system": {
+    "x": "0.0 is the receiver's left sideline; 1.0 is the receiver's right sideline",
+    "y": "0.0 is the net; 1.0 is the receiver's baseline"
+  },
+  "rally_length_definition": "Number of recorded racket contacts, including the serve",
+  "points": [
+    {
+      "point_id": 1,
+      "outcome": "lost",
+      "rally_length": 4,
+      "shots": [
+        {
+          "shot_id": 1,
+          "hitter": "player_1",
+          "shot_type": "serve",
+          "landing_x": 0.72,
+          "landing_y": 0.78,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 2,
+          "hitter": "opponent",
+          "shot_type": "forehand_return",
+          "landing_x": 0.18,
+          "landing_y": 0.67,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 3,
+          "hitter": "player_1",
+          "shot_type": "forehand",
+          "landing_x": 0.81,
+          "landing_y": 0.70,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 4,
+          "hitter": "opponent",
+          "shot_type": "backhand",
+          "landing_x": 0.12,
+          "landing_y": 0.88,
+          "result": "winner"
+        }
+      ]
+    },
+    {
+      "point_id": 2,
+      "outcome": "won",
+      "rally_length": 3,
+      "shots": [
+        {
+          "shot_id": 1,
+          "hitter": "player_1",
+          "shot_type": "serve",
+          "landing_x": 0.15,
+          "landing_y": 0.83,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 2,
+          "hitter": "opponent",
+          "shot_type": "backhand_return",
+          "landing_x": 0.46,
+          "landing_y": 0.42,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 3,
+          "hitter": "player_1",
+          "shot_type": "forehand",
+          "landing_x": 0.88,
+          "landing_y": 0.76,
+          "result": "winner"
+        }
+      ]
+    },
+    {
+      "point_id": 3,
+      "outcome": "lost",
+      "rally_length": 5,
+      "shots": [
+        {
+          "shot_id": 1,
+          "hitter": "player_1",
+          "shot_type": "serve",
+          "landing_x": 0.48,
+          "landing_y": 0.71,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 2,
+          "hitter": "opponent",
+          "shot_type": "forehand_return",
+          "landing_x": 0.75,
+          "landing_y": 0.55,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 3,
+          "hitter": "player_1",
+          "shot_type": "backhand",
+          "landing_x": 0.22,
+          "landing_y": 0.82,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 4,
+          "hitter": "opponent",
+          "shot_type": "forehand",
+          "landing_x": 0.10,
+          "landing_y": 0.91,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 5,
+          "hitter": "player_1",
+          "shot_type": "backhand",
+          "landing_x": null,
+          "landing_y": null,
+          "result": "net_error"
+        }
+      ]
+    },
+    {
+      "point_id": 4,
+      "outcome": "won",
+      "rally_length": 6,
+      "shots": [
+        {
+          "shot_id": 1,
+          "hitter": "player_1",
+          "shot_type": "serve",
+          "landing_x": 0.83,
+          "landing_y": 0.80,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 2,
+          "hitter": "opponent",
+          "shot_type": "forehand_return",
+          "landing_x": 0.28,
+          "landing_y": 0.60,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 3,
+          "hitter": "player_1",
+          "shot_type": "backhand",
+          "landing_x": 0.74,
+          "landing_y": 0.87,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 4,
+          "hitter": "opponent",
+          "shot_type": "forehand",
+          "landing_x": 0.35,
+          "landing_y": 0.53,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 5,
+          "hitter": "player_1",
+          "shot_type": "forehand",
+          "landing_x": 0.10,
+          "landing_y": 0.72,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 6,
+          "hitter": "opponent",
+          "shot_type": "backhand",
+          "landing_x": null,
+          "landing_y": null,
+          "result": "wide_error"
+        }
+      ]
+    },
+    {
+      "point_id": 5,
+      "outcome": "lost",
+      "rally_length": 8,
+      "shots": [
+        {
+          "shot_id": 1,
+          "hitter": "player_1",
+          "shot_type": "serve",
+          "landing_x": 0.20,
+          "landing_y": 0.77,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 2,
+          "hitter": "opponent",
+          "shot_type": "forehand_return",
+          "landing_x": 0.66,
+          "landing_y": 0.58,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 3,
+          "hitter": "player_1",
+          "shot_type": "forehand",
+          "landing_x": 0.31,
+          "landing_y": 0.69,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 4,
+          "hitter": "opponent",
+          "shot_type": "backhand",
+          "landing_x": 0.79,
+          "landing_y": 0.82,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 5,
+          "hitter": "player_1",
+          "shot_type": "backhand",
+          "landing_x": 0.24,
+          "landing_y": 0.63,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 6,
+          "hitter": "opponent",
+          "shot_type": "forehand",
+          "landing_x": 0.16,
+          "landing_y": 0.89,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 7,
+          "hitter": "player_1",
+          "shot_type": "backhand",
+          "landing_x": 0.55,
+          "landing_y": 0.48,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 8,
+          "hitter": "opponent",
+          "shot_type": "forehand",
+          "landing_x": 0.08,
+          "landing_y": 0.93,
+          "result": "winner"
+        }
+      ]
+    },
+    {
+      "point_id": 6,
+      "outcome": "won",
+      "rally_length": 5,
+      "shots": [
+        {
+          "shot_id": 1,
+          "hitter": "player_1",
+          "shot_type": "serve",
+          "landing_x": 0.76,
+          "landing_y": 0.84,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 2,
+          "hitter": "opponent",
+          "shot_type": "backhand_return",
+          "landing_x": 0.36,
+          "landing_y": 0.59,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 3,
+          "hitter": "player_1",
+          "shot_type": "backhand",
+          "landing_x": 0.72,
+          "landing_y": 0.74,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 4,
+          "hitter": "opponent",
+          "shot_type": "forehand",
+          "landing_x": 0.43,
+          "landing_y": 0.46,
+          "result": "in_play"
+        },
+        {
+          "shot_id": 5,
+          "hitter": "player_1",
+          "shot_type": "forehand",
+          "landing_x": 0.91,
+          "landing_y": 0.86,
+          "result": "winner"
+        }
+      ]
+    }
+  ]
+}
