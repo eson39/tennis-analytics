@@ -1,1 +1,11 @@
 .venv/
+backend/.venv/
+backend/storage/videos/*
+!backend/storage/videos/.gitkeep
+backend/storage/metadata/*
+!backend/storage/metadata/.gitkeep
+frontend/node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+.DS_Store
