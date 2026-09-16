@@ -1,20 +1,37 @@
 from contextlib import asynccontextmanager
+import sys
+from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
+
+# Ensure repo-root packages (`cv`, `workers`) are importable when uvicorn runs
+# from the backend directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from app.config import ensure_storage_dirs
-from app.schemas import Match, MatchCreateResponse
+from app.jobs import enqueue_match_processing
+from app.schemas import (
+    CourtResponse,
+    Match,
+    MatchCreateResponse,
+    MatchStatusResponse,
+)
 from app.storage import (
     InvalidVideoError,
     MatchNotFoundError,
     delete_match,
+    get_court,
     get_match,
     get_video_file,
     list_matches,
     save_uploaded_video,
+    update_match_fields,
 )
+from workers.process_match import process_match
 
 
 @asynccontextmanager
@@ -23,7 +40,7 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="CourtVision API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="CourtVision API", version="0.2.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +66,8 @@ async def create_match(file: UploadFile = File(...)) -> MatchCreateResponse:
     except InvalidVideoError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    enqueue_match_processing(match.match_id, process_match)
+
     return MatchCreateResponse(
         match_id=match.match_id,
         status=match.status,
@@ -70,12 +89,66 @@ def get_match_by_id(match_id: str) -> Match:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
+@app.get("/matches/{match_id}/status", response_model=MatchStatusResponse)
+def get_match_status(match_id: str) -> MatchStatusResponse:
+    try:
+        match = get_match(match_id)
+    except MatchNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    return MatchStatusResponse(
+        match_id=match.match_id,
+        status=match.status,
+        progress=match.progress,
+        error_message=match.error_message,
+        has_tracking=match.has_tracking,
+        has_court=match.has_court,
+    )
+
+
+@app.post("/matches/{match_id}/process", response_model=MatchStatusResponse)
+def reprocess_match(match_id: str) -> MatchStatusResponse:
+    try:
+        match = update_match_fields(
+            match_id,
+            status="queued",
+            progress=0.0,
+            error_message=None,
+            has_tracking=False,
+            has_court=False,
+        )
+    except MatchNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    enqueue_match_processing(match_id, process_match)
+    return MatchStatusResponse(
+        match_id=match.match_id,
+        status=match.status,
+        progress=match.progress,
+        error_message=match.error_message,
+        has_tracking=match.has_tracking,
+        has_court=match.has_court,
+    )
+
+
+@app.get("/matches/{match_id}/court", response_model=CourtResponse)
+def get_match_court(match_id: str) -> CourtResponse:
+    try:
+        get_match(match_id)
+        court = get_court(match_id)
+    except MatchNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    return CourtResponse(match_id=match_id, court=court)
+
+
 @app.delete("/matches/{match_id}", status_code=204)
-def remove_match(match_id: str) -> None:
+def remove_match(match_id: str) -> Response:
     try:
         delete_match(match_id)
     except MatchNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return Response(status_code=204)
 
 
 @app.get("/matches/{match_id}/video")

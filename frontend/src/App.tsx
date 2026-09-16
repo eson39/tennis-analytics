@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react'
 import { MatchList } from './components/MatchList'
 import { MatchPlayer } from './components/MatchPlayer'
 import { VideoUpload } from './components/VideoUpload'
-import { deleteMatch, getMatch, listMatches, type Match } from './services/api'
+import {
+  deleteMatch,
+  getMatch,
+  getMatchStatus,
+  isProcessingStatus,
+  listMatches,
+  type Match,
+} from './services/api'
 
 export default function App() {
   const [matches, setMatches] = useState<Match[]>([])
@@ -51,6 +58,63 @@ export default function App() {
     // Initial load only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Poll status while any visible match is still processing.
+  useEffect(() => {
+    const activeIds = matches
+      .filter((match) => isProcessingStatus(match.status))
+      .map((match) => match.match_id)
+
+    if (activeIds.length === 0) {
+      return
+    }
+
+    const interval = window.setInterval(() => {
+      void (async () => {
+        try {
+          const updates = await Promise.all(activeIds.map((id) => getMatchStatus(id)))
+          setMatches((prev) =>
+            prev.map((match) => {
+              const update = updates.find((item) => item.match_id === match.match_id)
+              if (!update) {
+                return match
+              }
+              return {
+                ...match,
+                status: update.status,
+                progress: update.progress,
+                error_message: update.error_message,
+                has_tracking: update.has_tracking,
+                has_court: update.has_court,
+              }
+            }),
+          )
+
+          setSelectedMatch((prev) => {
+            if (!prev) {
+              return prev
+            }
+            const update = updates.find((item) => item.match_id === prev.match_id)
+            if (!update) {
+              return prev
+            }
+            return {
+              ...prev,
+              status: update.status,
+              progress: update.progress,
+              error_message: update.error_message,
+              has_tracking: update.has_tracking,
+              has_court: update.has_court,
+            }
+          })
+        } catch {
+          // Keep polling; transient errors should not clear the UI.
+        }
+      })()
+    }, 1500)
+
+    return () => window.clearInterval(interval)
+  }, [matches])
 
   async function handleSelect(matchId: string) {
     setError(null)
@@ -105,7 +169,7 @@ export default function App() {
           <div>
             <p className="text-2xl font-semibold tracking-tight text-slate-900">CourtVision</p>
             <p className="mt-1 text-sm text-slate-600">
-              Upload a match video and play it back.
+              Upload a match video and detect court keypoints.
             </p>
           </div>
         </div>
@@ -141,6 +205,12 @@ export default function App() {
               match={selectedMatch}
               onClose={() => setSelectedMatch(null)}
               onRemove={() => void handleRemove(selectedMatch.match_id)}
+              onMatchUpdate={(next) => {
+                setSelectedMatch(next)
+                setMatches((prev) =>
+                  prev.map((item) => (item.match_id === next.match_id ? next : item)),
+                )
+              }}
               isRemoving={removingMatchId === selectedMatch.match_id}
             />
           ) : (

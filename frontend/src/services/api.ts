@@ -14,6 +14,10 @@ export interface Match {
   file_size_bytes: number
   created_at: string
   video_url: string
+  progress: number | null
+  error_message: string | null
+  has_tracking: boolean
+  has_court: boolean
 }
 
 export interface MatchCreateResponse {
@@ -21,6 +25,26 @@ export interface MatchCreateResponse {
   status: MatchStatus
   original_filename: string
   created_at: string
+}
+
+export interface MatchStatusResponse {
+  match_id: string
+  status: MatchStatus
+  progress: number | null
+  error_message: string | null
+  has_tracking: boolean
+  has_court: boolean
+}
+
+export interface CourtData {
+  method: string
+  num_keypoints: number
+  keypoints: number[][]
+  frame_index: number
+  frame_width: number
+  frame_height: number
+  fps: number
+  frame_count: number
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
@@ -50,6 +74,14 @@ export async function getMatch(matchId: string): Promise<Match> {
   return response.json()
 }
 
+export async function getMatchStatus(matchId: string): Promise<MatchStatusResponse> {
+  const response = await fetch(`${API_BASE}/matches/${matchId}/status`)
+  if (!response.ok) {
+    throw new Error(await readError(response))
+  }
+  return response.json()
+}
+
 export async function uploadMatch(file: File): Promise<MatchCreateResponse> {
   const formData = new FormData()
   formData.append('file', file)
@@ -66,6 +98,16 @@ export async function uploadMatch(file: File): Promise<MatchCreateResponse> {
   return response.json()
 }
 
+export async function reprocessMatch(matchId: string): Promise<MatchStatusResponse> {
+  const response = await fetch(`${API_BASE}/matches/${matchId}/process`, {
+    method: 'POST',
+  })
+  if (!response.ok) {
+    throw new Error(await readError(response))
+  }
+  return response.json()
+}
+
 export async function deleteMatch(matchId: string): Promise<void> {
   const response = await fetch(`${API_BASE}/matches/${matchId}`, {
     method: 'DELETE',
@@ -76,6 +118,19 @@ export async function deleteMatch(matchId: string): Promise<void> {
   }
 }
 
+export async function getCourt(matchId: string): Promise<CourtData> {
+  const response = await fetch(`${API_BASE}/matches/${matchId}/court`)
+  if (!response.ok) {
+    throw new Error(await readError(response))
+  }
+  const data = (await response.json()) as { court: CourtData }
+  return data.court
+}
+
 export function matchVideoUrl(match: Match): string {
   return `${API_BASE}${match.video_url}`
+}
+
+export function isProcessingStatus(status: MatchStatus): boolean {
+  return status === 'queued' || status === 'processing' || status === 'analyzing'
 }

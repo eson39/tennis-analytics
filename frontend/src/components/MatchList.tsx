@@ -48,8 +48,14 @@ export function MatchList({
                   <p className="truncate text-sm font-medium text-slate-900">
                     {match.original_filename}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500">
                     {new Date(match.created_at).toLocaleString()} · {match.status}
+                    {typeof match.progress === 'number' &&
+                    (match.status === 'processing' ||
+                      match.status === 'queued' ||
+                      match.status === 'analyzing')
+                      ? ` · ${Math.round(match.progress * 100)}%`
+                      : ''}
                   </p>
                 </button>
                 <button

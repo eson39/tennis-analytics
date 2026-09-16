@@ -4,8 +4,13 @@ backend/storage/videos/*
 !backend/storage/videos/.gitkeep
 backend/storage/metadata/*
 !backend/storage/metadata/.gitkeep
+backend/storage/court/*
+!backend/storage/court/.gitkeep
 frontend/node_modules/
 frontend/dist/
 __pycache__/
 *.pyc
 .DS_Store
+*.pt
+models/*.pth
+runs/

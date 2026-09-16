@@ -2,23 +2,20 @@
 
 Full-stack tennis match analytics from single-camera footage.
 
-## Current status
+## Current focus
 
-**Phase 1** — upload a match video and play it in the browser (`frontend/` + `backend/`).
+**Court keypoints only** — upload a match video and detect 14 court landmarks with a ResNet50 model (same approach as [Tennis-Analysis-System](https://github.com/ameynarwadkar/Tennis-Analysis-System) / [abdullahtarek/tennis_analysis](https://github.com/abdullahtarek/tennis_analysis)).
 
-The existing `dashboard/` and `data/` folders are separate exploratory analytics work (including heatmaps) and are not part of the Phase 1 app.
+Player tracking is intentionally removed for now.
 
-## Phase 1 architecture
+## Setup
 
-```text
-React (Vite)  →  FastAPI  →  local filesystem storage
+### Model weights
+
+```bash
+pip install gdown
+gdown 1QrTOF1ToQ4plsSZbkBs3zOLkVt3MBlta -O models/keypoints_model.pth
 ```
-
-- Videos are stored under `backend/storage/videos/`
-- Match metadata is stored as JSON under `backend/storage/metadata/`
-- No Redis, Celery, Postgres, or CV pipeline yet — those come in later phases
-
-## Run locally
 
 ### Backend
 
@@ -27,10 +24,8 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --reload-dir app --port 8000
 ```
-
-API docs: http://127.0.0.1:8000/docs
 
 ### Frontend
 
@@ -40,13 +35,19 @@ npm install
 npm run dev
 ```
 
-App: http://127.0.0.1:5173
+## Verify
 
-The Vite dev server proxies `/matches` and `/health` to the API, so you do not need a separate CORS setup for local development beyond what is already configured.
+1. Upload a tennis clip.
+2. Wait for status `completed`.
+3. Toggle **Court keypoints** on the video — you should see 14 numbered red points.
 
-## Phase 1 checklist
+## Storage
 
-1. Start backend and frontend.
-2. Open the app and upload an `.mp4` / `.mov` / `.webm` file.
-3. Confirm the API returns a `match_id` and the match appears in the list.
-4. Confirm the video plays in the browser player.
+```text
+backend/storage/
+  videos/{match_id}.mp4
+  metadata/{match_id}.json
+  court/{match_id}.json
+models/
+  keypoints_model.pth
+```
