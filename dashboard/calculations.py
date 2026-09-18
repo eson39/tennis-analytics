@@ -108,60 +108,34 @@ print("Player 1 deep-right percentage:", deep_right_percentage)
 print("Player 1 total weight:", sum(p1_weights))
 print("Opponent total weight:", sum(opponent_weights))
 
+def plot_heatmap(x_values, y_values, weights, title):
+    plt.figure()
+    percentages, x_edges, y_edges, image = plt.hist2d(
+        x_values, y_values,
+        bins=3, 
+        range=[[0, 1], [0, 1]],
+        vmin=0,
+        vmax=100,
+        weights=weights
+    )
 
-plt.figure()
-p1_percentages, p1_x_edges, p1_y_edges, p1_image = plt.hist2d(
-    p1_x, p1_y, 
-    bins=3, 
-    range=[[0, 1], [0, 1]],
-    vmin=0,
-    vmax=100,
-    weights=p1_weights
-)
-print("Player 1 percentages:", p1_percentages)
-plt.title("Player 1 Shot Landings")
-plt.xlabel("Court width (0 = receiver's left, 1 = right)")
-plt.ylabel("Court depth (0 = net, 1 = baseline)")
-plt.xlim(0, 1)
-plt.ylim(0, 1)
-plt.colorbar(label="Percentage of valid landings")
-for x_index in range(3):
-    for y_index in range(3):
-        plt.text(
-            (p1_x_edges[x_index] + p1_x_edges[x_index + 1]) / 2,
-            (p1_y_edges[y_index] + p1_y_edges[y_index + 1]) / 2,
-            f"{p1_percentages[x_index, y_index]:.1f}%",
-            ha="center",
-            va="center",
-            color="white"
-        )
+    plt.title(title)
+    plt.xlabel("Court width (0 = receiver's left, 1 = right)")
+    plt.ylabel("Court depth (0 = net, 1 = baseline)")
+    plt.xlim(0, 1)
+    plt.ylim(0, 1)
+    plt.colorbar(label="Percentage of valid landings")
+    for x_index in range(3):
+        for y_index in range(3):
+            plt.text(
+                (x_edges[x_index] + x_edges[x_index + 1]) / 2,
+                (y_edges[y_index] + y_edges[y_index + 1]) / 2,
+                f"{percentages[x_index, y_index]:.1f}%",
+                ha="center",
+                va="center",
+                color="white"
+            )
 
-plt.figure()
-opponent_percentages, opponent_x_edges, opponent_y_edges, opponent_image = plt.hist2d(
-    opponent_x, opponent_y, 
-    bins=3, 
-    range=[[0, 1], [0, 1]],
-    vmin=0,
-    vmax=100,
-    weights=opponent_weights
-)
-print("Opponent percentages:", opponent_percentages)
-plt.title("Opponent Shot Landings")
-plt.xlabel("Court width (0 = receiver's left, 1 = right)")
-plt.ylabel("Court depth (0 = net, 1 = baseline)")
-plt.xlim(0, 1)
-plt.ylim(0, 1)
-plt.colorbar(label="Percentage of valid landings")
-for x_index in range(3):
-    for y_index in range(3):
-        plt.text(
-            (opponent_x_edges[x_index] + opponent_x_edges[x_index + 1]) / 2,
-            (opponent_y_edges[y_index] + opponent_y_edges[y_index + 1]) / 2,
-            f"{opponent_percentages[x_index, y_index]:.1f}%",
-            ha="center",
-            va="center",
-            color="white"
-        )
-
-
+plot_heatmap(p1_x, p1_y, p1_weights, "Player 1 Shot Landings")
+plot_heatmap(opponent_x, opponent_y, opponent_weights, "Opponent Shot Landings")
 plt.show()
