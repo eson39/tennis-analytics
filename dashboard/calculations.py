@@ -35,6 +35,27 @@ def analyze_match(match_data):
         "average_rally_length": average_rally_length,
     }
 
+def get_valid_shots(match_data):
+    valid_shots = []
+
+    for point in match_data["points"]:
+        for shot in point["shots"]:
+            if (
+                shot["landing_x"] is not None
+                and shot["landing_y"] is not None
+            ):
+                valid_shots.append(shot)
+
+    return valid_shots
+
+def get_player_shots(valid_shots, hitter):
+    player_shots = []
+
+    for shot in valid_shots:
+        if shot["hitter"] == hitter:
+            player_shots.append(shot)
+
+    return player_shots
 
 def plot_heatmap(x_values, y_values, weights, title):
     """Draw a player's percentage heatmap with labels in all nine regions."""
@@ -68,7 +89,6 @@ def plot_heatmap(x_values, y_values, weights, title):
                 color="white",
             )
 
-
 if __name__ == "__main__":
     # Load sample match data when this file is run directly.
     data_file = (
@@ -84,17 +104,9 @@ if __name__ == "__main__":
     points = match_data["points"]
 
     # Keep shots with landing coordinates, then separate them by hitter.
-    valid_shots = []
+    valid_shots = get_valid_shots(match_data)
     p1_shots = []
     opponent_shots = []
-
-    for point in points:
-        for shot in point["shots"]:
-            if (
-                shot["landing_x"] is not None
-                and shot["landing_y"] is not None
-            ):
-                valid_shots.append(shot)
 
     for shot in valid_shots:
         if shot["hitter"] == "player_1":
