@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from calculations import analyze_match, get_valid_shots, get_player_shots
+from calculations import analyze_match, get_valid_shots, get_player_shots, get_coordinates
 
 data_file = (
     Path(__file__).parent.parent
@@ -14,6 +14,8 @@ results = analyze_match(match_data)
 valid_shots = get_valid_shots(match_data)
 p1_shots = get_player_shots(valid_shots, "player_1")
 opponent_shots = get_player_shots(valid_shots, "opponent")
+p1_x, p1_y = get_coordinates(p1_shots)
+opponent_x, opponent_y = get_coordinates(opponent_shots)
 
 print("Match Summary")
 print(f"Total Points: {results['total_points']}")

@@ -57,6 +57,17 @@ def get_player_shots(valid_shots, hitter):
 
     return player_shots
 
+def get_coordinates(player_shots):
+    x_values = []
+    y_values = []
+
+    for shot in player_shots:
+        x_values.append(shot["landing_x"])
+        y_values.append(shot["landing_y"])
+
+    return x_values, y_values
+
+
 def plot_heatmap(x_values, y_values, weights, title):
     """Draw a player's percentage heatmap with labels in all nine regions."""
     plt.figure()
