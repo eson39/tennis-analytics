@@ -67,6 +67,57 @@ def get_coordinates(player_shots):
 
     return x_values, y_values
 
+def get_region_stats(player_shots):
+    """Return counts and percentages indexed by [column][row].
+
+    Expects numeric landing coordinates within 0–1 for one player's shots.
+    Columns run left to right; rows run from the net to the baseline.
+    """
+    counts = [
+        [0, 0, 0],  # Left, short, mid-depth, deep
+        [0, 0, 0],  # Middle: short, mid-depth, deep
+        [0, 0, 0],  # Right : short, mid-depth, deep
+    ]
+
+    percentages = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    for shot in player_shots:
+        x = shot["landing_x"]
+        y = shot["landing_y"]
+
+        if x < 1 / 3:
+            column = 0
+        elif x < 2 / 3:
+            column = 1
+        else:
+            column = 2
+
+        if y < 1 / 3:
+            row = 0
+        elif y < 2 / 3:
+            row = 1
+        else:
+            row = 2
+
+        counts[column][row] += 1
+
+    total_shots = len(player_shots)
+
+    if total_shots > 0:
+        for c in range(3):
+            for r in range(3):
+                percentages[c][r] = counts[c][r] / total_shots * 100
+
+    return {
+        "counts": counts,
+        "percentages": percentages,
+        "total_shots": total_shots,
+    }
+
 
 def plot_heatmap(x_values, y_values, weights, title):
     """Draw a player's percentage heatmap with labels in all nine regions."""
