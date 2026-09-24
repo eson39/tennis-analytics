@@ -10,6 +10,7 @@ from app.config import (
     ALLOWED_VIDEO_EXTENSIONS,
     COURT_DIR,
     METADATA_DIR,
+    TRACKS_DIR,
     VIDEOS_DIR,
     ensure_storage_dirs,
 )
@@ -40,6 +41,10 @@ def _court_path(match_id: str) -> Path:
     return COURT_DIR / f"{match_id}.json"
 
 
+def _tracking_path(match_id: str) -> Path:
+    return TRACKS_DIR / f"{match_id}.json"
+
+
 def _read_metadata(match_id: str) -> dict[str, Any]:
     ensure_storage_dirs()
     path = _metadata_path(match_id)
@@ -67,7 +72,7 @@ def _to_match(data: dict[str, Any]) -> Match:
         video_url=f"/matches/{data['match_id']}/video",
         progress=data.get("progress"),
         error_message=data.get("error_message"),
-        has_tracking=False,
+        has_tracking=bool(data.get("has_tracking", False)),
         has_court=bool(data.get("has_court", False)),
     )
 
@@ -108,10 +113,24 @@ def save_court(match_id: str, court: dict[str, Any]) -> None:
         json.dump(court, file)
 
 
+def save_tracking(match_id: str, tracking: dict[str, Any]) -> None:
+    ensure_storage_dirs()
+    with _tracking_path(match_id).open("w", encoding="utf-8") as file:
+        json.dump(tracking, file)
+
+
 def get_court(match_id: str) -> dict[str, Any]:
     path = _court_path(match_id)
     if not path.exists():
         raise MatchNotFoundError(f"Court geometry for match {match_id} not found")
+    with path.open("r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+def get_tracking(match_id: str) -> dict[str, Any]:
+    path = _tracking_path(match_id)
+    if not path.exists():
+        raise MatchNotFoundError(f"Tracking for match {match_id} not found")
     with path.open("r", encoding="utf-8") as file:
         return json.load(file)
 
@@ -122,6 +141,7 @@ def delete_match(match_id: str) -> None:
     _video_path(match_id, extension).unlink(missing_ok=True)
     _metadata_path(match_id).unlink(missing_ok=True)
     _court_path(match_id).unlink(missing_ok=True)
+    _tracking_path(match_id).unlink(missing_ok=True)
     (METADATA_DIR / f"{match_id}.error.log").unlink(missing_ok=True)
 
 async def save_uploaded_video(upload: UploadFile) -> Match:

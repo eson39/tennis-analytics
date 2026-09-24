@@ -47,6 +47,30 @@ export interface CourtData {
   frame_count: number
 }
 
+export interface TrackedPlayer {
+  track_id: number
+  source_track_id?: number
+  bbox: [number, number, number, number]
+  center: [number, number]
+  foot: [number, number]
+}
+
+export interface TrackingFrame {
+  frame_index: number
+  timestamp_ms: number
+  players: TrackedPlayer[]
+}
+
+export interface TrackingData {
+  fps: number
+  frame_width: number
+  frame_height: number
+  frame_count: number
+  frame_stride: number
+  chosen_source_track_ids: number[]
+  frames: TrackingFrame[]
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
 async function readError(response: Response): Promise<string> {
@@ -125,6 +149,15 @@ export async function getCourt(matchId: string): Promise<CourtData> {
   }
   const data = (await response.json()) as { court: CourtData }
   return data.court
+}
+
+export async function getTracking(matchId: string): Promise<TrackingData> {
+  const response = await fetch(`${API_BASE}/matches/${matchId}/tracking`)
+  if (!response.ok) {
+    throw new Error(await readError(response))
+  }
+  const data = (await response.json()) as { tracking: TrackingData }
+  return data.tracking
 }
 
 export function matchVideoUrl(match: Match): string {

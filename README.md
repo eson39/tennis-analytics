@@ -4,9 +4,9 @@ Full-stack tennis match analytics from single-camera footage.
 
 ## Current focus
 
-**Court keypoints only** — upload a match video and detect 14 court landmarks with a ResNet50 model (same approach as [Tennis-Analysis-System](https://github.com/ameynarwadkar/Tennis-Analysis-System) / [abdullahtarek/tennis_analysis](https://github.com/abdullahtarek/tennis_analysis)).
-
-Player tracking is intentionally removed for now.
+- ResNet50 court keypoints (14 landmarks)
+- YOLOv8x player tracking with persistent IDs
+- Lock exactly 2 players closest to the court keypoints (same strategy as [Tennis-Analysis-System](https://github.com/ameynarwadkar/Tennis-Analysis-System))
 
 ## Setup
 
@@ -16,6 +16,8 @@ Player tracking is intentionally removed for now.
 pip install gdown
 gdown 1QrTOF1ToQ4plsSZbkBs3zOLkVt3MBlta -O models/keypoints_model.pth
 ```
+
+YOLOv8x weights download automatically on first run.
 
 ### Backend
 
@@ -38,16 +40,6 @@ npm run dev
 ## Verify
 
 1. Upload a tennis clip.
-2. Wait for status `completed`.
-3. Toggle **Court keypoints** on the video — you should see 14 numbered red points.
-
-## Storage
-
-```text
-backend/storage/
-  videos/{match_id}.mp4
-  metadata/{match_id}.json
-  court/{match_id}.json
-models/
-  keypoints_model.pth
-```
+2. Wait for `completed`.
+3. Toggle court keypoints / player boxes / foot markers.
+4. Confirm at most two player boxes (P1 near, P2 far) stay locked through the rally.

@@ -19,6 +19,7 @@ from app.schemas import (
     Match,
     MatchCreateResponse,
     MatchStatusResponse,
+    TrackingResponse,
 )
 from app.storage import (
     InvalidVideoError,
@@ -26,6 +27,7 @@ from app.storage import (
     delete_match,
     get_court,
     get_match,
+    get_tracking,
     get_video_file,
     list_matches,
     save_uploaded_video,
@@ -140,6 +142,17 @@ def get_match_court(match_id: str) -> CourtResponse:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     return CourtResponse(match_id=match_id, court=court)
+
+
+@app.get("/matches/{match_id}/tracking", response_model=TrackingResponse)
+def get_match_tracking(match_id: str) -> TrackingResponse:
+    try:
+        get_match(match_id)
+        tracking = get_tracking(match_id)
+    except MatchNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    return TrackingResponse(match_id=match_id, tracking=tracking)
 
 
 @app.delete("/matches/{match_id}", status_code=204)

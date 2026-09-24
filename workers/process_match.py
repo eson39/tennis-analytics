@@ -11,17 +11,18 @@ for path in (REPO_ROOT, BACKEND_ROOT):
     if path_str not in sys.path:
         sys.path.insert(0, path_str)
 
-from app.config import COURT_MODEL_PATH  # noqa: E402
+from app.config import COURT_MODEL_PATH, FRAME_STRIDE, YOLO_MODEL_NAME  # noqa: E402
 from app.storage import (  # noqa: E402
     get_video_file,
     save_court,
+    save_tracking,
     update_match_fields,
 )
 from cv.pipeline import run_pipeline  # noqa: E402
 
 
 def process_match(match_id: str) -> None:
-    """Run court-keypoint detection for a match and persist the artifact."""
+    """Run court keypoints + locked 2-player tracking for a match."""
     try:
         update_match_fields(
             match_id,
@@ -45,27 +46,33 @@ def process_match(match_id: str) -> None:
         result = run_pipeline(
             video_path,
             court_model_path=COURT_MODEL_PATH,
+            yolo_model_path=YOLO_MODEL_NAME,
+            frame_stride=FRAME_STRIDE,
             on_progress=on_progress,
         )
 
-        if result.court is None or result.status == "failed":
+        if result.status == "failed" or result.court is None:
             update_match_fields(
                 match_id,
                 status="failed",
                 progress=1.0,
-                error_message=result.error or "Court detection failed",
+                error_message=result.error or "Processing failed",
                 has_tracking=False,
                 has_court=False,
             )
             return
 
         save_court(match_id, result.court)
+        has_tracking = result.tracking is not None
+        if result.tracking is not None:
+            save_tracking(match_id, result.tracking)
+
         update_match_fields(
             match_id,
             status="completed",
             progress=1.0,
-            error_message=None,
-            has_tracking=False,
+            error_message=result.error,
+            has_tracking=has_tracking,
             has_court=True,
         )
     except Exception as exc:  # noqa: BLE001

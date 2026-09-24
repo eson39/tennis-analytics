@@ -6,6 +6,8 @@ backend/storage/metadata/*
 !backend/storage/metadata/.gitkeep
 backend/storage/court/*
 !backend/storage/court/.gitkeep
+backend/storage/tracks/*
+!backend/storage/tracks/.gitkeep
 frontend/node_modules/
 frontend/dist/
 __pycache__/

@@ -169,7 +169,7 @@ export default function App() {
           <div>
             <p className="text-2xl font-semibold tracking-tight text-slate-900">CourtVision</p>
             <p className="mt-1 text-sm text-slate-600">
-              Upload a match video and detect court keypoints.
+              Upload a match video to detect court keypoints and track two players.
             </p>
           </div>
         </div>

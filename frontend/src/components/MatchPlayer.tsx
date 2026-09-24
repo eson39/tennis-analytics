@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CourtData, Match } from '../services/api'
+import type { CourtData, Match, TrackingData } from '../services/api'
 import {
   getCourt,
+  getTracking,
   isProcessingStatus,
   matchVideoUrl,
   reprocessMatch,
@@ -32,23 +33,26 @@ export function MatchPlayer({
 }: MatchPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [court, setCourt] = useState<CourtData | null>(null)
+  const [tracking, setTracking] = useState<TrackingData | null>(null)
+  const [currentTime, setCurrentTime] = useState(0)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isReprocessing, setIsReprocessing] = useState(false)
   const [showCourtKeypoints, setShowCourtKeypoints] = useState(true)
-  const [, setTick] = useState(0)
+  const [showBoxes, setShowBoxes] = useState(true)
+  const [showMarkers, setShowMarkers] = useState(true)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) {
       return
     }
-    // Redraw overlay when the video element resizes / metadata loads.
-    const redraw = () => setTick((value) => value + 1)
-    video.addEventListener('loadedmetadata', redraw)
-    window.addEventListener('resize', redraw)
+    const onTimeUpdate = () => setCurrentTime(video.currentTime)
+    const onSeeked = () => setCurrentTime(video.currentTime)
+    video.addEventListener('timeupdate', onTimeUpdate)
+    video.addEventListener('seeked', onSeeked)
     return () => {
-      video.removeEventListener('loadedmetadata', redraw)
-      window.removeEventListener('resize', redraw)
+      video.removeEventListener('timeupdate', onTimeUpdate)
+      video.removeEventListener('seeked', onSeeked)
     }
   }, [match.match_id])
 
@@ -58,19 +62,24 @@ export function MatchPlayer({
     async function loadArtifacts() {
       setLoadError(null)
       setCourt(null)
-
-      if (!match.has_court) {
-        return
-      }
+      setTracking(null)
 
       try {
-        const nextCourt = await getCourt(match.match_id)
-        if (!cancelled) {
-          setCourt(nextCourt)
+        if (match.has_court) {
+          const nextCourt = await getCourt(match.match_id)
+          if (!cancelled) {
+            setCourt(nextCourt)
+          }
+        }
+        if (match.has_tracking) {
+          const nextTracking = await getTracking(match.match_id)
+          if (!cancelled) {
+            setTracking(nextTracking)
+          }
         }
       } catch (err) {
         if (!cancelled) {
-          setLoadError(err instanceof Error ? err.message : 'Failed to load court')
+          setLoadError(err instanceof Error ? err.message : 'Failed to load analytics')
         }
       }
     }
@@ -79,7 +88,7 @@ export function MatchPlayer({
     return () => {
       cancelled = true
     }
-  }, [match.match_id, match.has_court, match.status])
+  }, [match.match_id, match.has_court, match.has_tracking, match.status])
 
   async function handleReprocess() {
     setIsReprocessing(true)
@@ -91,10 +100,11 @@ export function MatchPlayer({
         status: status.status,
         progress: status.progress,
         error_message: status.error_message,
-        has_tracking: false,
+        has_tracking: status.has_tracking,
         has_court: status.has_court,
       })
       setCourt(null)
+      setTracking(null)
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Failed to reprocess')
     } finally {
@@ -128,7 +138,7 @@ export function MatchPlayer({
               disabled={isRemoving || isReprocessing || processing}
               className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isReprocessing ? 'Queuing…' : 'Reprocess court'}
+              {isReprocessing ? 'Queuing…' : 'Reprocess'}
             </button>
             <button
               type="button"
@@ -151,7 +161,7 @@ export function MatchPlayer({
 
       {processing ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-          Detecting court keypoints… {match.error_message ?? ''}
+          Processing… {match.error_message ?? 'court keypoints + player tracking'}
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-emerald-100">
             <div
               className="h-full rounded-full bg-emerald-600 transition-all"
@@ -164,6 +174,12 @@ export function MatchPlayer({
       {match.status === 'failed' ? (
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
           Processing failed{match.error_message ? `: ${match.error_message}` : '.'}
+        </p>
+      ) : null}
+
+      {match.status === 'completed' && match.error_message ? (
+        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          {match.error_message}
         </p>
       ) : null}
 
@@ -187,7 +203,11 @@ export function MatchPlayer({
         <VideoOverlay
           videoRef={videoRef}
           court={court}
+          tracking={tracking}
           showCourtKeypoints={showCourtKeypoints}
+          showBoxes={showBoxes}
+          showMarkers={showMarkers}
+          currentTime={currentTime}
         />
       </div>
 
@@ -200,11 +220,22 @@ export function MatchPlayer({
           />
           Court keypoints
         </label>
-        {court ? (
-          <span className="text-xs text-slate-500">
-            {court.num_keypoints} keypoints · {court.method}
-          </span>
-        ) : null}
+        <label className="inline-flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={showBoxes}
+            onChange={(event) => setShowBoxes(event.target.checked)}
+          />
+          Player boxes
+        </label>
+        <label className="inline-flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={showMarkers}
+            onChange={(event) => setShowMarkers(event.target.checked)}
+          />
+          Foot markers
+        </label>
       </div>
 
       <p className="font-mono text-xs text-slate-500">match_id: {match.match_id}</p>

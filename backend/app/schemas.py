@@ -41,3 +41,8 @@ class MatchStatusResponse(BaseModel):
 class CourtResponse(BaseModel):
     match_id: str
     court: dict[str, Any]
+
+
+class TrackingResponse(BaseModel):
+    match_id: str
+    tracking: dict[str, Any]
